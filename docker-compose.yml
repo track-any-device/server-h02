@@ -1,0 +1,80 @@
+services:
+  h02-tcp:
+    build:
+      context: .
+      dockerfile: server/tcp/Dockerfile
+    image: trackanydevice/server-h02-tcp:latest
+    restart: unless-stopped
+    ports:
+      - "7020:7020"
+      - "9092:9092"
+    environment:
+      H02_TCP_ADDR: ":7020"
+      H02_TCP_HTTP_ADDR: ":9092"
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      REDIS_H02_DB: "2"
+      STREAM_KEY: "h02:telemetry"
+      DB_ENABLED: "${DB_ENABLED:-false}"
+      DB_HOST: "${DB_HOST:-mysql}"
+      DB_PORT: "${DB_PORT:-3306}"
+      DB_USERNAME: "${DB_USERNAME:-laravel}"
+      DB_PASSWORD: "${DB_PASSWORD:-}"
+      DB_DATABASE: "${DB_DATABASE:-laravel}"
+      APP_DEBUG: "${APP_DEBUG:-false}"
+    depends_on:
+      - redis
+    networks:
+      - h02net
+
+  h02-udp:
+    build:
+      context: .
+      dockerfile: server/udp/Dockerfile
+    image: trackanydevice/server-h02-udp:latest
+    restart: unless-stopped
+    ports:
+      - "7021:7021/udp"
+      - "9093:9093"
+    environment:
+      H02_UDP_ADDR: ":7021"
+      H02_UDP_HTTP_ADDR: ":9093"
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      REDIS_H02_DB: "2"
+      STREAM_KEY: "h02:telemetry"
+      DB_ENABLED: "${DB_ENABLED:-false}"
+      DB_HOST: "${DB_HOST:-mysql}"
+      DB_PORT: "${DB_PORT:-3306}"
+      DB_USERNAME: "${DB_USERNAME:-laravel}"
+      DB_PASSWORD: "${DB_PASSWORD:-}"
+      DB_DATABASE: "${DB_DATABASE:-laravel}"
+      APP_DEBUG: "${APP_DEBUG:-false}"
+    depends_on:
+      - redis
+    networks:
+      - h02net
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6381:6379"
+    networks:
+      - h02net
+
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    profiles: ["db"]
+    environment:
+      MYSQL_DATABASE: laravel
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: root
+    networks:
+      - h02net
+
+networks:
+  h02net:
+    driver: bridge

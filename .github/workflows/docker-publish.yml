@@ -1,0 +1,54 @@
+name: Build and Publish Docker Images
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    name: Build and push H02 TCP + UDP images
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read version
+        id: version
+        run: echo "version=$(cat VERSION)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push TCP image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: server/tcp/Dockerfile
+          push: true
+          tags: |
+            trackanydevice/server-h02-tcp:latest
+            trackanydevice/server-h02-tcp:v${{ steps.version.outputs.version }}
+          cache-from: type=gha,scope=h02-tcp
+          cache-to: type=gha,mode=max,scope=h02-tcp
+
+      - name: Build and push UDP image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: server/udp/Dockerfile
+          push: true
+          tags: |
+            trackanydevice/server-h02-udp:latest
+            trackanydevice/server-h02-udp:v${{ steps.version.outputs.version }}
+          cache-from: type=gha,scope=h02-udp
+          cache-to: type=gha,mode=max,scope=h02-udp

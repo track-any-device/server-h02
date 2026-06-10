@@ -1,0 +1,5 @@
+.env
+*.out
+*.test
+/server/tcp/h02-tcp
+/server/udp/h02-udp
