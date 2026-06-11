@@ -72,7 +72,7 @@ func (s *DeviceStore) CheckOrCreate(ctx context.Context, imei, model string) (Ch
 	}
 
 	// Not found — auto-create as pending.
-	name := fmt.Sprintf("H02 %s", imei)
+	name := imei
 	notes := fmt.Sprintf("Auto-registered via H02. Model: %s", model)
 	now := time.Now().UTC().Format("2006-01-02 15:04:05")
 
