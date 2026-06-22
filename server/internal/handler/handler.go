@@ -18,7 +18,6 @@ package handler
 
 import (
 	"context"
-	"fmt"
 	"h02-server/pkg/protocol"
 	"h02-server/server/internal/config"
 	"h02-server/server/internal/forwarder"
@@ -67,11 +66,10 @@ func (h *Handler) DispatchTCP(ctx context.Context, sess *session.Session, f *pro
 			time.AfterFunc(200*time.Millisecond, sess.Close)
 			return
 		}
-		if result == store.CheckNotApproved || result == store.CheckAutoCreated {
-			h.log.Warn("device not approved — closing TCP",
-				zap.String("imei", f.IMEI),
+		if result == store.CheckBlocked {
+			h.log.Warn("device blocked — closing TCP",
+				zap.String("broadcast_id", f.IMEI),
 				zap.String("addr", sess.RemoteAddr()),
-				zap.String("result", fmt.Sprintf("%d", result)),
 			)
 			m.LoginFailure.Inc()
 			time.AfterFunc(200*time.Millisecond, sess.Close)
