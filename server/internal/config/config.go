@@ -44,7 +44,7 @@ type Config struct {
 
 	DBDevicesTable    string
 	DBIMEIColumn      string
-	DBApprovedColumn  string
+	DBBroadcastColumn string
 	DBStatusColumn    string
 	DBTypeIDColumn    string
 	DBNameColumn      string
@@ -97,7 +97,7 @@ func Load() *Config {
 
 		DBDevicesTable:    envStr("DB_DEVICES_TABLE", "devices"),
 		DBIMEIColumn:      envStr("DB_IMEI_COLUMN", "imei"),
-		DBApprovedColumn:  envStr("DB_APPROVED_COLUMN", "is_approved"),
+		DBBroadcastColumn: envStr("DB_BROADCAST_COLUMN", "broadcast_id"),
 		DBStatusColumn:    envStr("DB_STATUS_COLUMN", "status"),
 		DBTypeIDColumn:    envStr("DB_TYPE_ID_COLUMN", "device_type_id"),
 		DBNameColumn:      envStr("DB_NAME_COLUMN", "name"),

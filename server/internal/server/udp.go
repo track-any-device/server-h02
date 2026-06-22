@@ -139,14 +139,16 @@ func (s *UDPServer) processDatagram(ctx context.Context, conn *net.UDPConn, remo
 		s.metrics.IMEIRejected.Inc()
 		return
 	}
-	if result != store.CheckApproved {
-		s.log.Warn("UDP device not approved — dropping datagram",
-			zap.String("imei", imei),
+	if result == store.CheckBlocked {
+		s.log.Warn("UDP device blocked — dropping datagram",
+			zap.String("broadcast_id", imei),
 			zap.String("remote", remote.String()),
 		)
 		s.metrics.IMEIRejected.Inc()
 		return
 	}
+	// CheckApproved + CheckAutoCreated (new pending) → allow; broadcasts flow and
+	// package-h02 skips signal storage for pending devices until activated.
 
 	// Add to approval cache.
 	s.approvedIMEIs.Store(imei, &approvedEntry{approvedAt: now, lastSeen: now})
