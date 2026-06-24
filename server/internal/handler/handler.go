@@ -168,6 +168,8 @@ func (h *Handler) handleHTBTTCP(ctx context.Context, sess *session.Session, f *p
 	}
 	m.Heartbeats.Inc()
 	h.devices.RecordHeartbeat(ctx, sess.IMEI)
+	// Keep-alive event → consumer forwards "device alive" for REST/MQTT tenants (no-op otherwise).
+	go h.fwd.PublishEvent(ctx, "heartbeat", "tcp", sess.IMEI, map[string]any{})
 	h.log.Debug("HTBT heartbeat (TCP)", zap.String("imei", sess.IMEI))
 }
 
@@ -226,6 +228,7 @@ func (h *Handler) handleV1UDP(ctx context.Context, f *protocol.Frame, m *metrics
 func (h *Handler) handleHTBTUDP(ctx context.Context, f *protocol.Frame, respond func([]byte) error, m *metrics.UDPMetrics) {
 	m.Heartbeats.Inc()
 	h.devices.RecordHeartbeat(ctx, f.IMEI)
+	go h.fwd.PublishEvent(ctx, "heartbeat", "udp", f.IMEI, map[string]any{})
 	h.log.Debug("HTBT heartbeat (UDP)", zap.String("imei", f.IMEI))
 	// Online sorted-set update is done by the UDP server for every datagram, not just HTBT.
 	if respond != nil {
